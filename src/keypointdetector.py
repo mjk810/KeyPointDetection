@@ -3,6 +3,7 @@ import tensorflow as tf
 import numpy as np
 import os
 import matplotlib.pyplot as plt
+import cv2
 from src.keypointmapping import KeyPointMapping
 
 #TODO this will be slow bc it is separated from the video parser
@@ -20,14 +21,15 @@ class KeyPointDetector():
         self.keyPointDetector = model.signatures['serving_default']
         self.mapping = KeyPointMapping()
 
-    def generateKeyPoints(self, im: np.ndarray, keyPointPath: os.PathLike, overlayPath: os.PathLike) -> None:
+    def generateKeyPoints(self, im: np.ndarray, keyPointPath: os.PathLike, overlayPath: os.PathLike, imNumber: int) -> None:
+        #plt.imshow(np.squeeze(im.astype(np.uint8)))
         im = self._prepImage(im = im)
         outputs = self.keyPointDetector(im)
 
         outputArray = outputs['output_0'].numpy() #the output array is shape 1, 6, 56; thre are 17 keypoints with y, x, confidence, + 5 elements for the bounding box
         reshapedArray = outputArray[0][0][:51].reshape(17,3)
         plt.figure(figsize=(5, 5))
-        #plt.imshow(np.squeeze(im))
+        
         #add keypoints
         for i in range(17):
             plt.plot(reshapedArray[i][1]*self.IMAGE_SHAPE[0], reshapedArray[i][0]*self.IMAGE_SHAPE[1], marker='o', color="red")
@@ -44,9 +46,12 @@ class KeyPointDetector():
         #generate a gif from the list of frames
         plt.axis([0, 256, 256, 0])
         plt.axis('off')
-        plt.savefig(keyPointPath)
+        #plt.show()
+        plt.savefig(os.path.join(keyPointPath, 'frame_' + str(imNumber)+'.jpg'))
+        
         plt.imshow(np.squeeze(im))
-        plt.savefig(overlayPath)
+        #plt.show()
+        plt.savefig(os.path.join(overlayPath, 'frame_' + str(imNumber)+'.jpg'))
         #plt.show()
         plt.close()
         return None
@@ -56,6 +61,7 @@ class KeyPointDetector():
         Resize to the required shape for imagenet and 
         normalize and convert to tensor
         """
+        im = cv2.cvtColor(im, cv2.COLOR_BGR2RGB)
         im = np.array(im)
         #im = cv2.resize(im, self.IMAGE_SHAPE) 
         #im = im/255.0

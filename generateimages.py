@@ -6,8 +6,8 @@ import matplotlib.pyplot as plt
 from src.generategif import GenerateGif
 
 #manually deleting frames that don't have person, so need to comment this out momentarily
-#videoParser = VideoParser()
-#videoParser.processVideos()
+videoParser = VideoParser()
+videoParser.processVideos()
 
 '''
 #key point detector; keeping separate now so that the images without a person can be manually removed
@@ -34,6 +34,6 @@ for f in filesToLoad:
 #could create runners for each of these (gneerate images and keypoint detectors), then from this file,
 #pass in true or false if it needs to run or not as a config? or just pass the condition for now
 
-#read the keypoint files and create a gif
-gifGenerator = GenerateGif()
-gifGenerator.create(imdir = os.path.join('Images','Vid_1','KeyPointsOverlay'))
+#read the keypoint files and create a gif TODO integrate this so that all the files don't need to be read again
+#gifGenerator = GenerateGif()
+#gifGenerator.create(imdir = os.path.join('Images','Vid_1','KeyPointsOverlay'))
