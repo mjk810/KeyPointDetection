@@ -17,6 +17,7 @@ class DataIO():
         """
         Save a list of images to the specified filepath
         """
+        os.makedirs(filePath, exist_ok=True)
         for idx, fig in enumerate(images):
             fname = os.path.join(filePath, 'frame_' + str(idx)+'.jpg')
             fig.savefig(fname)

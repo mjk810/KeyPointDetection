@@ -3,6 +3,7 @@ import os
 import numpy as np
 from src.objectdetector import ObjectDetector
 from src.keypointdetector import KeyPointDetector
+from src.generategif import GenerateGif
 import json
 from src.utils.dataio import DataIO
 
@@ -19,6 +20,7 @@ class VideoParser():
         self.filesToLoad: list[str] = os.listdir(self.DIR_PATH)
         #self.objectDetector = ObjectDetector()
         self.keyPointDetector = KeyPointDetector()
+        self.gifGenerator = GenerateGif()
         self.config = config
 
     def processVideos(self) -> None:
@@ -51,10 +53,13 @@ class VideoParser():
             print('saving')
             keyPointImages = self.keyPointDetector.keyPointImages
             DataIO.saveImages(images=keyPointImages, filePath = os.path.join(saveDir, 'KeyPoints'))
+            self.gifGenerator.generateGifFromList(imageList = keyPointImages, imdir = os.path.join(saveDir, 'KeyPoints'), config=self.config)
+            
             if self.config['saveOverlay'] == 'True':
                 overlayPath=os.path.join(saveDir, 'KeyPointsOverlay')
                 keyPointOverlay = self.keyPointDetector.keyPointOverlayImages
                 DataIO.saveImages(images=keyPointOverlay, filePath = overlayPath)
+                self.gifGenerator.generateGifFromList(imageList = keyPointOverlay, imdir = os.path.join(saveDir, 'KeyPointsOverlay'), config=self.config)
             #TODO could generate the gif right here is saving keypoint images as they are read
     
     #TODO - this method should be removedS

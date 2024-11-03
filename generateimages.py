@@ -13,11 +13,6 @@ def run():
     videoParser = VideoParser(config = config)
     videoParser.processVideos()
 
-    if config["createGif"]=='True':
-        #read the keypoint files and create a gif TODO integrate this so that all the files don't need to be read again
-        gifGenerator = GenerateGif()
-        gifGenerator.create(imdir = os.path.join('Images','Vid_1','KeyPointsOverlay'))
-        gifGenerator.create(imdir = os.path.join('Images','Vid_1','KeyPoints'))
 
 
 
