@@ -4,6 +4,7 @@ import numpy as np
 from src.objectdetector import ObjectDetector
 from src.keypointdetector import KeyPointDetector
 import matplotlib.pyplot as plt
+import json
 
 class VideoParser():
     """
@@ -14,10 +15,11 @@ class VideoParser():
     OUT_PATH = 'Images'
     IMAGE_SHAPE = (256,256) 
 
-    def __init__(self):
+    def __init__(self, config: json):
         self.filesToLoad: list[str] = os.listdir(self.DIR_PATH)
         #self.objectDetector = ObjectDetector()
         self.keyPointDetector = KeyPointDetector()
+        self.config = config
 
     def processVideos(self) -> None:
         
@@ -30,39 +32,22 @@ class VideoParser():
 
             while success:
                 success, im = video.read() #need to reshape; reduce size? current 828, 1792, 3
-                #im = rawim.astype(float)
-                
-                #im = cv2.cvtColor(im, cv2.COLOR_BGR2RGB)
-                #plt.imshow(im)
-                #cv2.waitKey(1)
 
                 if im is not None:
                     im = self.formatImage(im=im)
-                    #plt.imshow(im)
-                    #plt.show()
-                    #im = cv2.flip(im, 0)
-                    #im = self.objectDetector.run(im=im)
-                    #self.keypoints = self.keyPointDetector.generateKeyPoints(im=im)
                     
-                    #TODO handle this differently; if you want to save the orig frame, pass something in
-                    #self.saveImage(saveDir=saveDir, im=im, counter=counter) #TODO maybe have a separate class to save these
-                    #imRead = cv2.imread(os.path.join('Images','Vid_1','frame_{}.jpg'.format(counter)))
-                    #im = cv2.cvtColor(imRead, cv2.COLOR_BGR2RGB)
-                    #plt.imshow(imRead)
+                    if self.config['saveFrames'] == 'True':
+                        self.saveImage(saveDir=saveDir, im=im, counter=counter) #TODO maybe have a separate class to save these
                     
-                    #cv2.imshow('image', im)
-                    #if cv2.waitKey(1):
-                    #    break
+                    overlayPath=os.path.join(saveDir, 'KeyPointsOverlay') if self.config['saveOverlay'] == 'True' else None
                     self.keyPointDetector.generateKeyPoints(im=im,
                                     keyPointPath=os.path.join(saveDir, 'KeyPoints'),
-                                    overlayPath=os.path.join(saveDir, 'KeyPointsOverlay'),
+                                    overlayPath=overlayPath,
                                     imNumber = counter)
                     counter+=1
             video.release()
             cv2.destroyAllWindows()    
 
-        #plt.imshow(frames[0])
-        #plt.show()
             #TODO could generate the gif right here is saving keypoint images as they are read
     #TODO - this method should be removed
     def formatImage(self, im: os.PathLike) -> np.ndarray:

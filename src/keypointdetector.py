@@ -20,7 +20,10 @@ class KeyPointDetector():
         model = hub.load("https://www.kaggle.com/models/google/movenet/TensorFlow2/multipose-lightning/1")
         self.keyPointDetector = model.signatures['serving_default']
         self.mapping = KeyPointMapping()
-
+        self.keyPointImages = []
+        self.keyPointOverlayImages = []
+    #TODO - return the images from this function so that they can be saved from the videoparser
+    #or add them to a list and store as a class variable then just get them later and save them
     def generateKeyPoints(self, im: np.ndarray, keyPointPath: os.PathLike, overlayPath: os.PathLike, imNumber: int) -> None:
         #plt.imshow(np.squeeze(im.astype(np.uint8)))
         im = self._prepImage(im = im)
@@ -49,9 +52,11 @@ class KeyPointDetector():
         #plt.show()
         plt.savefig(os.path.join(keyPointPath, 'frame_' + str(imNumber)+'.jpg'))
         
-        plt.imshow(np.squeeze(im))
+        #plt.imshow(np.squeeze(im))
         #plt.show()
-        plt.savefig(os.path.join(overlayPath, 'frame_' + str(imNumber)+'.jpg'))
+        if overlayPath is not None:
+            plt.imshow(np.squeeze(im))
+            plt.savefig(os.path.join(overlayPath, 'frame_' + str(imNumber)+'.jpg'))
         #plt.show()
         plt.close()
         return None
