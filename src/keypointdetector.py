@@ -6,10 +6,6 @@ import matplotlib.pyplot as plt
 import cv2
 from src.keypointmapping import KeyPointMapping
 
-#TODO this will be slow bc it is separated from the video parser
-#it would be better if this was combined with the video parser
-# so that the images aren't looped over multiple times or saved multiple times
-# should be called from the video parser method 
 class KeyPointDetector():
     """
     Generate images with key points from the images in the images folder
@@ -24,12 +20,23 @@ class KeyPointDetector():
         self._keyPointOverlayImages = []
 
     def generateKeyPoints(self, im: np.ndarray, saveOverlay: str) -> None:
+        """Method that will process the image to include keypoints and lines
+
+        Args:
+            im (np.ndarray): a cv2 image
+            saveOverlay (str): True or False (str not bool) as to
+            whether the overlay images should be saved or not
+
+        Returns:
+            None: No return value
+        """
         im = self._prepImage(im = im)
         outputs = self.keyPointDetector(im)
 
         outputArray = outputs['output_0'].numpy() #the output array is shape 1, 6, 56; thre are 17 keypoints with y, x, confidence, + 5 elements for the bounding box
         reshapedArray = outputArray[0][0][:51].reshape(17,3)
         
+        #TODO this should be a method so it isn't duplicated
         f = plt.figure(figsize=(5, 5))
         new_plot = f.add_subplot(111)
         self._addKeyPoints(subPlot = new_plot, reshapedArray = reshapedArray)
@@ -51,7 +58,16 @@ class KeyPointDetector():
         
         return None
     
-    def _addKeyPoints(self, subPlot, reshapedArray: np.ndarray):
+    def _addKeyPoints(self, subPlot: plt.Axes, reshapedArray: np.ndarray) -> plt.Axes:
+        """Add the keypoints and lines to the image
+
+        Args:
+            subPlot (plt.Axes): A matplotlib subplot
+            reshapedArray (np.ndarray): _description_
+
+        Returns:
+            plt.Axes: The axes updated with the key points
+        """
         #add keypoints
         for i in range(17):
             subPlot.plot(reshapedArray[i][1]*self.IMAGE_SHAPE[0], reshapedArray[i][0]*self.IMAGE_SHAPE[1], marker='o', color="red")
