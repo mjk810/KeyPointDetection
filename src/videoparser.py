@@ -24,6 +24,10 @@ class VideoParser():
         self.config = config
 
     def processVideos(self) -> None:
+        """Convert video into frames with keypoints
+        Frames and keypoints are saved to directory
+        Create gif if gif is specified in config file
+        """
         
         for f in self.filesToLoad:
             saveDir = os.path.join(self.OUT_PATH, f.split('.')[0]) #This is something like Images/Vid_1
@@ -33,13 +37,13 @@ class VideoParser():
             counter, success = 0, 1
 
             while success:
-                success, im = video.read() #need to reshape; reduce size? current 828, 1792, 3
+                success, im = video.read() 
 
                 if im is not None:
                     im = self.formatImage(im=im)
                     
                     if self.config['saveFrames'] == 'True':
-                        self.saveImage(saveDir=saveDir, im=im, counter=counter) #TODO maybe have a separate class to save these
+                        DataIO.saveImage(filePath=saveDir, im=im, counter=counter) 
                     
                     self.keyPointDetector.generateKeyPoints(im=im,
                                     saveOverlay = self.config['saveOverlay'])
@@ -60,10 +64,12 @@ class VideoParser():
                 keyPointOverlay = self.keyPointDetector.keyPointOverlayImages
                 DataIO.saveImages(images=keyPointOverlay, filePath = overlayPath)
                 self.gifGenerator.generateGifFromList(imageList = keyPointOverlay, imdir = os.path.join(saveDir, 'KeyPointsOverlay'), config=self.config)
-            #TODO could generate the gif right here is saving keypoint images as they are read
+
     
     #TODO - this method should be removedS
     def formatImage(self, im: os.PathLike) -> np.ndarray:
         im = cv2.resize(im, self.IMAGE_SHAPE) 
 
         return im
+
+    

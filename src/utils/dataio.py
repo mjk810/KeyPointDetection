@@ -1,5 +1,7 @@
 import matplotlib.pyplot as plt
 import os
+import numpy as np
+import cv2
 
 
 class DataIO():
@@ -11,6 +13,10 @@ class DataIO():
     @staticmethod
     def saveFile(self):
         pass
+
+    @staticmethod
+    def saveImage(im: np.ndarray, filePath: os.PathLike, counter: int) -> None:
+        cv2.imwrite(os.path.join(filePath, 'Frame_'+str(counter)+'.jpg'), im)
 
     @staticmethod
     def saveImages(images: list, filePath: os.PathLike) -> None:
