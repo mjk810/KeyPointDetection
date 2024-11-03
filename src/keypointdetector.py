@@ -20,19 +20,35 @@ class KeyPointDetector():
         model = hub.load("https://www.kaggle.com/models/google/movenet/TensorFlow2/multipose-lightning/1")
         self.keyPointDetector = model.signatures['serving_default']
         self.mapping = KeyPointMapping()
-        self.keyPointImages = []
-        self.keyPointOverlayImages = []
-    #TODO - return the images from this function so that they can be saved from the videoparser
-    #or add them to a list and store as a class variable then just get them later and save them
+        self._keyPointImages = []
+        self._keyPointOverlayImages = []
+
     def generateKeyPoints(self, im: np.ndarray, keyPointPath: os.PathLike, overlayPath: os.PathLike, imNumber: int) -> None:
-        #plt.imshow(np.squeeze(im.astype(np.uint8)))
         im = self._prepImage(im = im)
         outputs = self.keyPointDetector(im)
 
         outputArray = outputs['output_0'].numpy() #the output array is shape 1, 6, 56; thre are 17 keypoints with y, x, confidence, + 5 elements for the bounding box
         reshapedArray = outputArray[0][0][:51].reshape(17,3)
-        plt.figure(figsize=(5, 5))
         
+        f = plt.figure(figsize=(5, 5))
+        new_plot = f.add_subplot(111)
+        self._addKeyPoints(subPlot = new_plot, reshapedArray = reshapedArray)
+        plt.axis([0, 256, 256, 0])
+        plt.axis('off')
+        self._keyPointImages.append(f)
+        plt.close()
+
+        #create the overlay plot
+        if overlayPath is not None:
+            f2 = plt.figure(figsize=(5, 5))
+            new_plot2 = f2.add_subplot(111)
+            self._addKeyPoints(subPlot = new_plot2, reshapedArray = reshapedArray)
+            new_plot2.imshow(np.squeeze(im))
+            plt.axis([0, 256, 256, 0])
+            plt.axis('off')
+            self._keyPointOverlayImages.append(f2)
+            plt.close()
+        '''
         #add keypoints
         for i in range(17):
             plt.plot(reshapedArray[i][1]*self.IMAGE_SHAPE[0], reshapedArray[i][0]*self.IMAGE_SHAPE[1], marker='o', color="red")
@@ -49,17 +65,35 @@ class KeyPointDetector():
         #generate a gif from the list of frames
         plt.axis([0, 256, 256, 0])
         plt.axis('off')
+        self._keyPointImages.append(f)
         #plt.show()
-        plt.savefig(os.path.join(keyPointPath, 'frame_' + str(imNumber)+'.jpg'))
+        #plt.savefig(os.path.join(keyPointPath, 'frame_' + str(imNumber)+'.jpg'))
         
         #plt.imshow(np.squeeze(im))
         #plt.show()
+        #TODO - can remove this; shouldn't be passing overlay path here; use the config file in the videoparser
         if overlayPath is not None:
             plt.imshow(np.squeeze(im))
-            plt.savefig(os.path.join(overlayPath, 'frame_' + str(imNumber)+'.jpg'))
+            #plt.savefig(os.path.join(overlayPath, 'frame_' + str(imNumber)+'.jpg'))
+            self._keyPointOverlayImages.append(f)
         #plt.show()
         plt.close()
+        '''
         return None
+    
+    def _addKeyPoints(self, subPlot, reshapedArray: np.ndarray):
+        #add keypoints
+        for i in range(17):
+            subPlot.plot(reshapedArray[i][1]*self.IMAGE_SHAPE[0], reshapedArray[i][0]*self.IMAGE_SHAPE[1], marker='o', color="red")
+        #add the lines connecting the keypoints
+        for l in self.mapping.LINES:
+            indOne = self.mapping.KEY_POINT_NAMES.index(l[0])
+            indTwo = self.mapping.KEY_POINT_NAMES.index(l[1])
+            subPlot.plot([reshapedArray[indOne][1]*self.IMAGE_SHAPE[0], reshapedArray[indTwo][1]*self.IMAGE_SHAPE[0]],
+                     [reshapedArray[indOne][0]*self.IMAGE_SHAPE[1], reshapedArray[indTwo][0]*self.IMAGE_SHAPE[1]],
+                      color='k',linestyle='-')
+            
+        return subPlot
     
     def _prepImage(self, im: np.ndarray) -> tf.Tensor:
         """
@@ -76,3 +110,10 @@ class KeyPointDetector():
         im = tf.expand_dims(im, axis=0)
         return im
 
+    @property
+    def keyPointImages(self):
+        return self._keyPointImages
+
+    @property
+    def keyPointOverlayImages(self):
+        return self._keyPointOverlayImages

@@ -5,6 +5,7 @@ from src.objectdetector import ObjectDetector
 from src.keypointdetector import KeyPointDetector
 import matplotlib.pyplot as plt
 import json
+from src.utils.dataio import DataIO
 
 class VideoParser():
     """
@@ -40,14 +41,24 @@ class VideoParser():
                         self.saveImage(saveDir=saveDir, im=im, counter=counter) #TODO maybe have a separate class to save these
                     
                     overlayPath=os.path.join(saveDir, 'KeyPointsOverlay') if self.config['saveOverlay'] == 'True' else None
+                    #TODO - don't need to pass the file paths to this function
                     self.keyPointDetector.generateKeyPoints(im=im,
                                     keyPointPath=os.path.join(saveDir, 'KeyPoints'),
                                     overlayPath=overlayPath,
                                     imNumber = counter)
+                    print('video parser {}'.format(counter))
                     counter+=1
             video.release()
             cv2.destroyAllWindows()    
 
+            #TODO - this should be a separate function
+            #get and save the images
+            print('saving')
+            keyPointImages = self.keyPointDetector.keyPointImages
+            DataIO.saveImages(images=keyPointImages, filePath = os.path.join(saveDir, 'KeyPoints'))
+            if self.config['saveOverlay'] == 'True':
+                keyPointOverlay = self.keyPointDetector.keyPointOverlayImages
+                DataIO.saveImages(images=keyPointOverlay, filePath = overlayPath)
             #TODO could generate the gif right here is saving keypoint images as they are read
     #TODO - this method should be removed
     def formatImage(self, im: os.PathLike) -> np.ndarray:
