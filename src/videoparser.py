@@ -3,7 +3,6 @@ import os
 import numpy as np
 from src.objectdetector import ObjectDetector
 from src.keypointdetector import KeyPointDetector
-import matplotlib.pyplot as plt
 import json
 from src.utils.dataio import DataIO
 
@@ -40,12 +39,8 @@ class VideoParser():
                     if self.config['saveFrames'] == 'True':
                         self.saveImage(saveDir=saveDir, im=im, counter=counter) #TODO maybe have a separate class to save these
                     
-                    overlayPath=os.path.join(saveDir, 'KeyPointsOverlay') if self.config['saveOverlay'] == 'True' else None
-                    #TODO - don't need to pass the file paths to this function
                     self.keyPointDetector.generateKeyPoints(im=im,
-                                    keyPointPath=os.path.join(saveDir, 'KeyPoints'),
-                                    overlayPath=overlayPath,
-                                    imNumber = counter)
+                                    saveOverlay = self.config['saveOverlay'])
                     print('video parser {}'.format(counter))
                     counter+=1
             video.release()
@@ -57,22 +52,13 @@ class VideoParser():
             keyPointImages = self.keyPointDetector.keyPointImages
             DataIO.saveImages(images=keyPointImages, filePath = os.path.join(saveDir, 'KeyPoints'))
             if self.config['saveOverlay'] == 'True':
+                overlayPath=os.path.join(saveDir, 'KeyPointsOverlay')
                 keyPointOverlay = self.keyPointDetector.keyPointOverlayImages
                 DataIO.saveImages(images=keyPointOverlay, filePath = overlayPath)
             #TODO could generate the gif right here is saving keypoint images as they are read
-    #TODO - this method should be removed
+    
+    #TODO - this method should be removedS
     def formatImage(self, im: os.PathLike) -> np.ndarray:
-        #im = cv2.flip(im, 0)
-        #im = cv2.flip(im, 1)
         im = cv2.resize(im, self.IMAGE_SHAPE) 
-        #im = cv2.cvtColor(im, cv2.COLOR_BGR2RGB)
 
         return im
-    
-    def saveImage(self, saveDir: os.PathLike, im: np.ndarray, counter: int) -> None:
-        cv2.imwrite(os.path.join(saveDir, 'frame_{}.jpg'.format(counter)), im)
-
-
-
-
-

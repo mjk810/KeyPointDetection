@@ -23,7 +23,7 @@ class KeyPointDetector():
         self._keyPointImages = []
         self._keyPointOverlayImages = []
 
-    def generateKeyPoints(self, im: np.ndarray, keyPointPath: os.PathLike, overlayPath: os.PathLike, imNumber: int) -> None:
+    def generateKeyPoints(self, im: np.ndarray, saveOverlay: str) -> None:
         im = self._prepImage(im = im)
         outputs = self.keyPointDetector(im)
 
@@ -39,7 +39,7 @@ class KeyPointDetector():
         plt.close()
 
         #create the overlay plot
-        if overlayPath is not None:
+        if saveOverlay == 'True':
             f2 = plt.figure(figsize=(5, 5))
             new_plot2 = f2.add_subplot(111)
             self._addKeyPoints(subPlot = new_plot2, reshapedArray = reshapedArray)
@@ -48,37 +48,7 @@ class KeyPointDetector():
             plt.axis('off')
             self._keyPointOverlayImages.append(f2)
             plt.close()
-        '''
-        #add keypoints
-        for i in range(17):
-            plt.plot(reshapedArray[i][1]*self.IMAGE_SHAPE[0], reshapedArray[i][0]*self.IMAGE_SHAPE[1], marker='o', color="red")
-        #add the lines connecting the keypoints
-        for l in self.mapping.LINES:
-            indOne = self.mapping.KEY_POINT_NAMES.index(l[0])
-            indTwo = self.mapping.KEY_POINT_NAMES.index(l[1])
-            plt.plot([reshapedArray[indOne][1]*self.IMAGE_SHAPE[0], reshapedArray[indTwo][1]*self.IMAGE_SHAPE[0]],
-                     [reshapedArray[indOne][0]*self.IMAGE_SHAPE[1], reshapedArray[indTwo][0]*self.IMAGE_SHAPE[1]],
-                      color='k',linestyle='-')
-            
-            #save the frames with the keypoints? will have to create the directory
-            #append the images to the self.frames list, then after 
-        #generate a gif from the list of frames
-        plt.axis([0, 256, 256, 0])
-        plt.axis('off')
-        self._keyPointImages.append(f)
-        #plt.show()
-        #plt.savefig(os.path.join(keyPointPath, 'frame_' + str(imNumber)+'.jpg'))
         
-        #plt.imshow(np.squeeze(im))
-        #plt.show()
-        #TODO - can remove this; shouldn't be passing overlay path here; use the config file in the videoparser
-        if overlayPath is not None:
-            plt.imshow(np.squeeze(im))
-            #plt.savefig(os.path.join(overlayPath, 'frame_' + str(imNumber)+'.jpg'))
-            self._keyPointOverlayImages.append(f)
-        #plt.show()
-        plt.close()
-        '''
         return None
     
     def _addKeyPoints(self, subPlot, reshapedArray: np.ndarray):
@@ -102,8 +72,6 @@ class KeyPointDetector():
         """
         im = cv2.cvtColor(im, cv2.COLOR_BGR2RGB)
         im = np.array(im)
-        #im = cv2.resize(im, self.IMAGE_SHAPE) 
-        #im = im/255.0
         im = tf.convert_to_tensor(im, dtype=tf.int32)
         im = tf.image.resize(im, self.IMAGE_SHAPE)
         im = tf.cast(im, tf.int32)
