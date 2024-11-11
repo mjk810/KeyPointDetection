@@ -22,3 +22,6 @@ The config file is used to specify whether to save the frames, the keypoint over
 `pip install -r requirements.txt`
 ##### Save a video to the Videos folder
 ##### Run generateimages.py
+
+#### Example output
+![](Images/Vid_2A/KeyPoints/pitch.gif)
