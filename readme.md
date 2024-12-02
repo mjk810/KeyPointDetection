@@ -24,4 +24,4 @@ The config file is used to specify whether to save the frames, the keypoint over
 ##### Run generateimages.py
 
 #### Example output
-![](Images/Vid_2A/KeyPoints/pitch.gif)
+![](ExampleOutput/pitch.gif)
